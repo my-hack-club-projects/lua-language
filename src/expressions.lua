@@ -152,6 +152,18 @@ end
 
 ---
 
+exps.string = oo.class(exps.Expression)
+
+function exps.string:init(value)
+    assert(checkType(value) == "string", "Value must be a string.")
+    self.value = value
+    self.type = types.string()
+end
+
+function exps.string:compile()
+    return string.format("(%q)", self.value)
+end
+
 exps.number = oo.class(exps.Expression)
 
 function exps.number:init(value)

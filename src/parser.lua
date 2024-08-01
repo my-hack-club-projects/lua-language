@@ -45,7 +45,7 @@ function parser:init(tokens)
             local name = next_token()
             assert(next_token() == "=", "Expected '='.")
             local expression_tokens = {}
-            while next_token() ~= ";" do
+            while next_token() ~= ";" and peek_token() ~= nil do
                 table.insert(expression_tokens, peek_token())
             end
             local value_expression = self:parse_expression(expression_tokens)
@@ -113,6 +113,10 @@ function parser:parse_expression(expression_tokens)
             else
                 return expressions.variable(token)
             end
+        elseif token:match('"(.-)"') then
+            return expressions.string(token:match('"(.-)"'))
+        else
+            error("Unexpected token: " .. token)
         end
     end
 

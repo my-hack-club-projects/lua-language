@@ -22,6 +22,8 @@ local input = [[
 
     a c = 20
     c = a
+
+    string d = "hello"
 ]]
 
 local lex = lexer(input)
