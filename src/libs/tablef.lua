@@ -16,6 +16,15 @@ function tablef.print(t, _indent)
     end
 end
 
+function tablef.every(t, f)
+    for k, v in pairs(t) do
+        if not f(k, v) then
+            return false
+        end
+    end
+    return true
+end
+
 function tablef.find(t, value)
     for k, v in pairs(t) do
         if v == value then

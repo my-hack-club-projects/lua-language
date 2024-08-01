@@ -4,30 +4,31 @@ local uuid = require 'libs.uuid'
 local checkType = type
 
 local variable = require 'variable'
+local types = require 'types'
 
 local ScopeTree = {
     any = {
-        type = "any",
+        type = types.any(),
         name = "any",
         value = nil,
     },
     none = {
-        type = "none",
+        type = types.none(),
         name = "none",
         value = nil,
     },
     number = {
-        type = "number",
+        type = types.number(),
         name = "number",
         value = nil,
     },
     string = {
-        type = "string",
+        type = types.string(),
         name = "string",
         value = nil,
     },
     boolean = {
-        type = "boolean",
+        type = types.boolean(),
         name = "boolean",
         value = nil,
     },
@@ -138,8 +139,8 @@ function exps.assign_variable:init(name, expression, scope_path)
 
     -- Check if the expression is of the same type as the variable
 
-    assert(scope[name].type == expression.type or scope[name].type == "any",
-        "Type mismatch. Expected " .. scope[name].type .. ", got " .. expression.type)
+    assert(scope[name].type:eq(expression.type) or scope[name].type:eq("any"),
+        "Type mismatch. Expected " .. tostring(scope[name].type) .. ", got " .. tostring(expression.type))
 
     self.name = name
     self.expression = expression
@@ -156,7 +157,7 @@ exps.number = oo.class(exps.Expression)
 function exps.number:init(value)
     assert(type(value) == "number", "Value must be a number.")
     self.value = value
-    self.type = "number"
+    self.type = types.number()
 end
 
 function exps.number:compile()
@@ -168,7 +169,7 @@ exps.boolean = oo.class(exps.Expression)
 function exps.boolean:init(value)
     assert(type(value) == "boolean", "Value must be a boolean.")
     self.value = value
-    self.type = "boolean"
+    self.type = types.boolean()
 end
 
 function exps.boolean:compile()
@@ -178,7 +179,7 @@ end
 exps.none = oo.class(exps.Expression)
 
 function exps.none:init()
-    self.type = "none"
+    self.type = types.none()
 end
 
 function exps.none:compile()
@@ -213,13 +214,14 @@ function exps.MathOperation:init(op, left, right)
     assert(type(op) == "string", "Operator must be a string.")
     assert(type(left) == "table", "Left must be an expression.")
     assert(type(right) == "table", "Right must be an expression.")
-    assert(left.type == "number" or left.type == "any", "Invalid type for operand. Got " .. left.type)
-    assert(right.type == "number" or right.type == "any", "Invalid type for operand. Got " .. right.type)
+
+    assert(left.type:eq("number") or left.type:eq("any"), "Invalid type for operand. Got " .. tostring(left.type))
+    assert(right.type:eq("number") or right.type:eq("any"), "Invalid type for operand. Got " .. tostring(right.type))
 
     self.op = op
     self.left = left
     self.right = right
-    self.type = "number"
+    self.type = types.number()
 end
 
 function exps.MathOperation:compile()
@@ -273,7 +275,7 @@ function exps.BooleanOperation:init(op, left, right)
     self.op = op
     self.left = left
     self.right = right
-    self.type = "boolean"
+    self.type = types.boolean()
 end
 
 function exps.BooleanOperation:compile()
@@ -297,7 +299,7 @@ exps.not_op = oo.class(exps.Expression)
 function exps.not_op:init(expression)
     assert(type(expression) == "table", "Expression must be an expression.")
     self.expression = expression
-    self.type = "boolean"
+    self.type = types.boolean()
 end
 
 function exps.not_op:compile()
