@@ -1,0 +1,57 @@
+-- This is the example code for the custom language.
+-- The language should be statically typed and have OOP features.
+-- The type-checking should be done at runtime.
+-- The features that already are in Lua should be kept the same.
+
+-- Variable
+number a = 10
+
+-- Function:
+function add(number a, number b) -> number
+    return a + b
+end
+
+-- For loop:
+for number i = 1, 10 do
+    print(i)
+end
+
+-- in pairs loop:
+for string key, number value in pairs({a = 1, b = 2, c = 3}) do
+    print(key, value)
+end
+
+-- python-like table operations:
+any table1 = {"A", "B", "C"}
+"A" in table1 -- true
+
+-- Class:
+class Person
+    string name
+    number age
+    static number count = 0
+
+    function Person(string name, number age) -> Person
+        self.name = name
+        self.age = age
+        Person.count = Person.count + 1
+    end
+
+    function greet() -> nil
+        print("Hello, my name is " .. self.name)
+    end
+end
+
+-- Inheritance:
+class Student extends Person
+    string school
+
+    function Student(string name, number age, string school) -> Student
+        super(name, age)
+        self.school = school
+    end
+
+    function greet() -> nil
+        print("Hello, my name is " .. self.name .. " and I go to " .. self.school)
+    end
+end
