@@ -173,7 +173,7 @@ function exps.number:init(value)
 end
 
 function exps.number:compile()
-    return tostring(self.value)
+    return string.format("number(%s)", self.value)
 end
 
 exps.boolean = oo.class(exps.Expression)
@@ -370,6 +370,26 @@ exps.greater_than_or_equal = oo.class(exps.ComparisonOperation)
 
 function exps.greater_than_or_equal:init(left, right)
     exps.ComparisonOperation.init(self, ">=", left, right)
+end
+
+---
+
+exps.function_call = oo.class(exps.Expression)
+
+function exps.function_call:init(name, args)
+    assert(type(name) == "string", "Name must be a string.")
+    assert(type(args) == "table", "Arguments must be a table.")
+    self.name = name
+    self.args = args
+    self.type = types.any()
+end
+
+function exps.function_call:compile()
+    local args = {}
+    for i, arg in ipairs(self.args) do
+        table.insert(args, arg:compile())
+    end
+    return self.name .. "(" .. table.concat(args, ", ") .. ")"
 end
 
 return exps

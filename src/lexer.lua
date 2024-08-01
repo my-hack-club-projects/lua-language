@@ -17,6 +17,7 @@ function lexer:init(input)
 
     local current_token, i = "", 1
     local literalStringOpen = false
+    local paranthesesOpen = 0
 
     while i <= #input do
         local c = input:sub(i, i)
@@ -32,16 +33,16 @@ function lexer:init(input)
                 table.insert(self.tokens, current_token)
                 current_token = ""
             end
-            if self.tokens[#self.tokens] ~= ";" then
+            if self.tokens[#self.tokens] ~= ";" and paranthesesOpen == 0 then
                 table.insert(self.tokens, ";")
             end
             i = i + 1
-        elseif c:match("[%w_]") or literalStringOpen then -- Alphanumeric or underscore
+        elseif c:match("[%w_]") or literalStringOpen and c ~= '"' then -- Alphanumeric or underscore
             current_token = current_token .. c
             i = i + 1
         elseif c:match('"') then -- String literal
             if literalStringOpen then
-                table.insert(self.tokens, current_token)
+                table.insert(self.tokens, current_token .. c)
                 current_token = ""
                 literalStringOpen = false
             else
@@ -50,6 +51,12 @@ function lexer:init(input)
             end
             i = i + 1
         elseif tablef.contains(self.separators, c) then -- Separator
+            if c == "(" or c == "{" or c == "[" then
+                paranthesesOpen = paranthesesOpen + 1
+            elseif c == ")" or c == "}" or c == "]" then
+                paranthesesOpen = paranthesesOpen - 1
+            end
+
             if current_token ~= "" then
                 table.insert(self.tokens, current_token)
                 current_token = ""

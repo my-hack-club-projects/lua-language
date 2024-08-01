@@ -39,6 +39,10 @@ function parser:init(tokens)
         local token = next_token()
         local prev_token = peek_token(-1)
 
+        if not token then
+            break
+        end
+
         -- Variable declaration.
         if (prev_token == nil or prev_token == ";") and peek_token(2) == "=" then
             local type = token
@@ -51,6 +55,7 @@ function parser:init(tokens)
             local value_expression = self:parse_expression(expression_tokens)
             local variable_expression = expressions.declare_variable(type, name, value_expression)
             table.insert(self.expressions, variable_expression)
+
             -- Variable assignment.
         elseif prev_token == ";" and peek_token(1) == "=" then
             local name = token
@@ -62,6 +67,49 @@ function parser:init(tokens)
             local value_expression = self:parse_expression(expression_tokens)
             local variable_expression = expressions.assign_variable(name, value_expression)
             table.insert(self.expressions, variable_expression)
+
+            -- Function call. Any expression that is not a variable declaration or assignment, followed by parantheses is considered a function call.
+            -- Steps:
+            -- 1. Parse the function name.
+            -- -- That can either be a single word or a dot-separated list of words
+            -- 2. Parse the arguments.
+            -- 3. Create a function call expression.
+        elseif token:match("^%a+$") and peek_token(1) == "." or peek_token(1) == "[" or peek_token(1) == "(" then
+            -- get the whole path. the current token is the first word.
+
+            local path = { token }
+            while next_token() == "." do
+                local _next = next_token()
+                assert(_next:match("^%a+$"), "Expected an identifier.")
+                table.insert(path, _next)
+            end
+
+            local function_name = table.concat(path, ".")
+
+            -- skip the function name and the opening parantheses
+            assert(peek_token() == "(")
+
+            local arguments = {}
+
+            while peek_token() ~= ")" do
+                local expression_tokens = {}
+                while next_token() ~= "," and peek_token() ~= ")" do
+                    table.insert(expression_tokens, peek_token())
+                end
+                for i = 1, #expression_tokens do
+                    print("Expression token: " .. expression_tokens[i])
+                end
+                local argument_expression = self:parse_expression(expression_tokens)
+                table.insert(arguments, argument_expression)
+            end
+
+            assert(peek_token() == ")", "Expected ')'.")
+            assert(next_token() == ";", "Expected ';'.")
+
+            local function_call_expression = expressions.function_call(function_name, arguments)
+            table.insert(self.expressions, function_call_expression)
+        else
+            error("Unexpected token: " .. token)
         end
     end
 end
